@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered E-Commerce Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .price-badge {
+            transition: all 0.3s ease;
+        }
+        .product-card:hover .price-badge {
+            transform: scale(1.1);
+            background-color: #4f46e5;
+        }
+        #chat-container {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold text-indigo-700 mb-2">AI-Powered E-Commerce</h1>
+            <p class="text-gray-600">Experience next-generation shopping with our intelligent features</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Product Filters -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Filters</h2>
+                
+                <!-- Basic Search -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Text Search</label>
+                    <input type="text" id="basic-search" placeholder="Search products..." 
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <!-- Category Filter -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select id="category-filter" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="all">All Categories</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                </div>
+                
+                <!-- Price Range -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-500">$10</span>
+                        <span class="text-sm text-gray-500">$200</span>
+                    </div>
+                    <input type="range" id="price-range" min="10" max="200" value="200" 
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="text-right">
+                        <span class="text-sm font-medium text-gray-700">Up to $<span id="price-value">200</span></span>
+                    </div>
+                </div>
+                
+                <!-- Rating Filter -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Rating</label>
+                    <div class="flex items-center">
+                        <input type="range" id="rating-filter" min="1" max="5" step="0.1" value="3" 
+                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mr-2">
+                        <span id="rating-value" class="text-sm font-medium text-gray-700">3.0+</span>
+                    </div>
+                </div>
+                
+                <!-- AI Feature Selector -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">AI Features</label>
+                    <select id="ai-feature-selector" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="none">Select AI Feature</option>
+                        <option value="smart-search">Smart Product Search</option>
+                        <option value="dynamic-pricing">Dynamic Pricing Insights</option>
+                        <option value="recommendations">Personalized Recommendations</option>
+                    </select>
+                </div>
+                
+                <!-- Smart Search Interface (Hidden by default) -->
+                <div id="smart-search-ui" class="hidden mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ask for products</label>
+                    <div class="flex">
+                        <input type="text" id="nlp-query" placeholder="e.g. 'running shoes under $100'" 
+                            class="flex-1 px-4 py-2 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        <button onclick="processSmartSearch()" class="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Recommendation Inputs (Hidden by default) -->
+                <div id="recommendation-ui" class="hidden mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
+                    <select id="user-category" class="w-full px-4 py-2 border rounded-lg mb-2">
+                        <option value="">Favorite Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                    <select id="user-budget" class="w-full px-4 py-2 border rounded-lg mb-2">
+                        <option value="">Budget Range</option>
+                        <option value="50">Under $50</option>
+                        <option value="100">Under $100</option>
+                        <option value="150">Under $150</option>
+                        <option value="200">Under $200</option>
+                    </select>
+                    <button onclick="generateRecommendations()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        Get Recommendations
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Middle Column - Product Display -->
+            <div class="lg:col-span-2">
+                <!-- Product Grid -->
+                <div id="product-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                    <!-- Products will be rendered here by JavaScript -->
+                </div>
+                
+                <!-- Recommendations Section (Hidden by default) -->
+                <div id="recommendations-container" class="hidden mt-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Recommended For You</h3>
+                    <div id="recommended-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Recommended products will appear here -->
+                    </div>
+                </div>
+                
+                <!-- Dynamic Pricing Insights (Hidden by default) -->
+                <div id="pricing-insights" class="hidden mt-8 bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2 text-blue-800">Dynamic Pricing Insights</h3>
+                    <p class="text-blue-600 mb-2">Our AI analyzes market trends to provide fair pricing:</p>
+                    <ul id="pricing-details" class="list-disc pl-5 text-blue-700">
+                        <!-- Pricing insights will appear here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Smart Search Chat Interface (Hidden by default) -->
+        <div id="chat-container" class="hidden fixed bottom-4 right-4 w-80 bg-white shadow-xl rounded-lg overflow-hidden">
+            <div class="bg-indigo-600 text-white p-3 flex justify-between items-center">
+                <h4 class="font-semibold">Smart Search Assistant</h4>
+                <button onclick="closeChat()" class="text-white">&times;</button>
+            </div>
+            <div id="chat-messages" class="p-3 h-60 overflow-y-auto">
+                <div class="text-sm text-gray-600 mb-2">Assistant: How can I help you find products today?</div>
+            </div>
+            <div class="p-3 border-t">
+                <div class="flex">
+                    <input type="text" id="chat-input" placeholder="Type your request..." 
+                        class="flex-1 px-3 py-2 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <button onclick="sendChatMessage()" class="px-3 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700">
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample product data
+        const products = [
+            {
+                id: 1,
+                name: "Advanced Running Shoes",
+                price: 109.99,
+                originalPrice: 109.99,
+                category: "Footwear",
+                description: "Professional running shoes with advanced cushioning technology for marathon runners.",
+                rating: 4.7,
+                image: "https://placehold.co/300x200?text=Running+Shoes",
+                popularity: 4.8,
+                lastUpdated: "2024-05-15"
+            },
+            {
+                id: 2,
+                name: "Premium Wireless Headphones",
+                price: 199.99,
+                originalPrice: 249.99,
+                category: "Electronics",
+                description: "Industry-leading noise cancellation with 30-hour battery life and premium sound quality.",
+                rating: 4.9,
+                image: "https://placehold.co/300x200?text=Headphones",
+                popularity: 4.9,
+                lastUpdated: "2024-06-01"
+            },
+            {
+                id: 3,
+                name: "Pro Yoga Mat",
+                price: 49.99,
+                originalPrice: 49.99,
+                category: "Fitness",
+                description: "Extra thick mat for joint protection with non-slip surface for all yoga positions.",
+                rating: 4.6,
+                image: "https://placehold.co/300x200?text=Yoga+Mat",
+                popularity: 4.2,
+                lastUpdated: "2024-04-20"
+            },
+            {
+                id: 4,
+                name: "Latest Smartwatch",
+                price: 179.99,
+                originalPrice: 199.99,
+                category: "Electronics",
+                description: "Health monitoring smartwatch with ECG, blood oxygen tracking, and 7-day battery.",
+                rating: 4.8,
+                image: "https://placehold.co/300x200?text=Smartwatch",
+                popularity: 4.7,
+                lastUpdated: "2024-05-30"
+            },
+            {
+                id: 5,
+                name: "Premium Tennis Racket",
+                price: 129.99,
+                originalPrice: 159.99,
+                category: "Sports",
+                description: "Carbon fiber construction with vibration dampening for professional players.",
+                rating: 4.5,
+                image: "https://placehold.co/300x200?text=Tennis+Racket",
+                popularity: 4.0,
+                lastUpdated: "2024-03-10"
+            },
+            {
+                id: 6,
+                name: "Advanced Fitness Tracker",
+                price: 79.99,
+                originalPrice: 99.99,
+                category: "Electronics",
+                description: "Track workouts, sleep, and stress with comprehensive health metrics.",
+                rating: 4.4,
+                image: "https://placehold.co/300x200?text=Fitness+Tracker",
+                popularity: 4.3,
+                lastUpdated: "2024-06-05"
+            },
+            {
+                id: 7,
+                name: "Insulated Water Bottle",
+                price: 24.99,
+                originalPrice: 24.99,
+                category: "Fitness",
+                description: "Double-walled insulation keeps drinks cold for 24 hours or hot for 12.",
+                rating: 4.2,
+                image: "https://placehold.co/300x200?text=Water+Bottle",
+                popularity: 3.9,
+                lastUpdated: "2024-02-18"
+            },
+            {
+                id: 8,
+                name: "Pro Cycling Gloves",
+                price: 34.99,
+                originalPrice: 39.99,
+                category: "Sports",
+                description: "Breathable gloves with gel padding for long-distance cycling comfort.",
+                rating: 4.3,
+                image: "https://placehold.co/300x200?text=Cycling+Gloves",
+                popularity: 3.8,
+                lastUpdated: "2024-01-25"
+            },
+            {
+                id: 9,
+                name: "Running Shorts",
+                price: 39.99,
+                originalPrice: 39.99,
+                category: "Footwear",
+                description: "Lightweight, quick-drying shorts with built-in liner for runners.",
+                rating: 4.1,
+                image: "https://placehold.co/300x200?text=Running+Shorts",
+                popularity: 4.0,
+                lastUpdated: "2024-05-10"
+            },
+            {
+                id: 10,
+                name: "Bluetooth Speaker",
+                price: 89.99,
+                originalPrice: 119.99,
+                category: "Electronics",
+                description: "Waterproof speaker with 20-hour battery life and deep bass.",
+                rating: 4.5,
+                image: "https://placehold.co/300x200?text=Bluetooth+Speaker",
+                popularity: 4.4,
+                lastUpdated: "2024-04-15"
+            }
+        ];
+
+        // DOM elements
+        const productContainer = document.getElementById('product-container');
+        const basicSearch = document.getElementById('basic-search');
+        const categoryFilter = document.getElementById('category-filter');
+        const priceRange = document.getElementById('price-range');
+        const priceValue = document.getElementById('price-value');
+        const ratingFilter = document.getElementById('rating-filter');
+        const ratingValue = document.getElementById('rating-value');
+        const aiFeatureSelector = document.getElementById('ai-feature-selector');
+        const smartSearchUI = document.getElementById('smart-search-ui');
+        const recommendationUI = document.getElementById('recommendation-ui');
+        const recommendationsContainer = document.getElementById('recommendations-container');
+        const recommendedProducts = document.getElementById('recommended-products');
+        const pricingInsights = document.getElementById('pricing-insights');
+        const pricingDetails = document.getElementById('pricing-details');
+        const chatContainer = document.getElementById('chat-container');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const nlpQuery = document.getElementById('nlp-query');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts(products);
+            
+            // Event listeners for filters
+            basicSearch.addEventListener('input', applyFilters);
+            categoryFilter.addEventListener('change', applyFilters);
+            priceRange.addEventListener('input', function() {
+                priceValue.textContent = this.value;
+                applyFilters();
+            });
+            ratingFilter.addEventListener('input', function() {
+                ratingValue.textContent = parseFloat(this.value).toFixed(1) + '+';
+                applyFilters();
+            });
+            
+            // AI Feature selector
+            aiFeatureSelector.addEventListener('change', function() {
+                smartSearchUI.classList.add('hidden');
+                recommendationUI.classList.add('hidden');
+                recommendationsContainer.classList.add('hidden');
+                pricingInsights.classList.add('hidden');
+                
+                switch(this.value) {
+                    case 'smart-search':
+                        smartSearchUI.classList.remove('hidden');
+                        break;
+                    case 'dynamic-pricing':
+                        showDynamicPricing();
+                        pricingInsights.classList.remove('hidden');
+                        break;
+                    case 'recommendations':
+                        recommendationUI.classList.remove('hidden');
+                        break;
+                }
+            });
+        });
+
+        // Render products to the page
+        function renderProducts(productsToRender) {
+            productContainer.innerHTML = '';
+            
+            productsToRender.forEach(product => {
+                const discountPercentage = product.price < product.originalPrice ? 
+                    Math.round((product.originalPrice - product.price) / product.originalPrice * 100) : 0;
+                
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-sm overflow-hidden transition duration-300';
+                productCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+                        ${discountPercentage > 0 ? `
+                            <span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                ${discountPercentage}% OFF
+                            </span>
+                        ` : ''}
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-semibold text-gray-800">${product.name}</h3>
+                            <span class="price-badge bg-indigo-100 text-indigo-800 font-bold px-2 py-1 rounded text-sm">$${product.price.toFixed(2)}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">${product.category}</p>
+                        <p class="text-sm text-gray-600 mb-3">${product.description}</p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                ${generateStarRating(product.rating)}
+                                <span class="ml-1 text-xs text-gray-500">${product.rating}</span>
+                            </div>
+                            ${
+                                product.price < product.originalPrice ? 
+                                `<span class="text-xs text-gray-500 line-through">$${product.originalPrice.toFixed(2)}</span>` : 
+                                ''
+                            }
+                        </div>
+                    </div>
+                `;
+                productContainer.appendChild(productCard);
+            });
+        }
+
+        // Generate star rating HTML
+        function generateStarRating(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(rating)) {
+                    stars += '<svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+                } else if (i === Math.ceil(rating) && rating % 1 >= 0.5) {
+                    stars += '<svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+                } else {
+                    stars += '<svg class="w-3 h-3 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+                }
+            }
+            return stars;
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            const searchTerm = basicSearch.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            const maxPrice = parseFloat(priceRange.value);
+            const minRating = parseFloat(ratingFilter.value);
+            
+            const filteredProducts = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                      product.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+                const matchesPrice = product.price <= maxPrice;
+                const matchesRating = product.rating >= minRating;
+                
+                return matchesSearch && matchesCategory && matchesPrice && matchesRating;
+            });
+            
+            renderProducts(filteredProducts);
+        }
+
+        // Option A: Smart Product Search (NLP) - Simplified implementation
+        function processSmartSearch() {
+            const query = nlpQuery.value.toLowerCase();
+            
+            // Simple keyword extraction (in a real app, you'd use NLP APIs)
+            const keywords = query.split(' ');
+            const priceMatch = query.match(/under \$(\d+)/) || query.match(/\$(\d+)/);
+            const maxPrice = priceMatch ? parseFloat(priceMatch[1]) : 1000;
+            const categoryMatch = query.match(/running shoes|headphones|smartwatch|yoga mat|tennis/i);
+            const category = categoryMatch ? categoryMatch[0] : null;
+            const ratingMatch = query.match(/\bgood\b|\bexcellent\b|\d+ star/i);
+            const minRating = ratingMatch ? 
+                (ratingMatch[0].toLowerCase().includes('good') ? 4 : 
+                 ratingMatch[0].toLowerCase().includes('excellent') ? 4.5 : 
+                 ratingMatch[0].toLowerCase().includes('star') ? parseFloat(ratingMatch[0]) : 4) : 3;
+            
+            const filteredProducts = products.filter(product => {
+                const matchesKeywords = keywords.some(keyword => 
+                    product.name.toLowerCase().includes(keyword) || 
+                    product.description.toLowerCase().includes(keyword));
+                const matchesPrice = product.price <= maxPrice;
+                const matchesCategory = !category || product.category.toLowerCase().includes(category.toLowerCase());
+                const matchesRating = product.rating >= minRating;
+                
+                return matchesKeywords || matchesPrice || matchesCategory || matchesRating;
+            });
+            
+            renderProducts(filteredProducts);
+            
+            // Show chat interface
+            chatContainer.classList.remove('hidden');
+            chatMessages.innerHTML += `
+                <div class="text-right text-sm mb-2">
+                    <span class="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-lg">${query}</span>
+                </div>
+                <div class="text-sm text-gray-600 mb-2">
+                    Found ${filteredProducts.length} products matching your criteria.
+                </div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            chatMessages.innerHTML += `
+                <div class="text-right text-sm mb-2">
+                    <span class="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-lg">${message}</span>
+                </div>
+            `;
+            
+            // Simulate AI response
+            setTimeout(() => {
+                let response;
+                if (message.toLowerCase().includes('price') || message.toLowerCase().includes('cost')) {
+                    response = "Our AI pricing engine adjusts prices based on demand and market conditions. Items with higher ratings or popularity often have competitive pricing.";
+                } else if (message.toLowerCase().includes('recommend') || message.toLowerCase().includes('suggest')) {
+                    response = "Based on similar customers, you might like our Advanced Running Shoes and Premium Wireless Headphones.";
+                } else {
+                    response = "I can help you find products, explain pricing, or make recommendations. Try asking 'What running shoes do you recommend?' or 'Why are these headphones priced at $199?'";
+                }
+                
+                chatMessages.innerHTML += `
+                    <div class="text-sm text-gray-600 mb-2">
+                        Assistant: ${response}
+                    </div>
+                `;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 500);
+            
+            chatInput.value = '';
+        }
+
+        function closeChat() {
+            chatContainer.classList.add('hidden');
+        }
+
+        // Option B: Dynamic Pricing Engine
+        function showDynamicPricing() {
+            pricingDetails.innerHTML = '';
+            
+            // Simple pricing algorithm (in a real app, you'd have more sophisticated logic)
+            products.forEach(product => {
+                // Adjust prices based on popularity, rating, and time since update
+                const popularityFactor = product.popularity / 5;
+                const ratingFactor = product.rating / 5;
+                const daysSinceUpdate = Math.floor((new Date() - new Date(product.lastUpdated)) / (1000 * 60 * 60 * 24));
+                const recencyFactor = Math.max(0, 1 - (daysSinceUpdate / 60)); // Discount older items
+                
+                const adjustmentFactor = 0.7 + (0.3 * ((popularityFactor + ratingFactor + recencyFactor) / 3));
+                
+                // Only adjust prices significantly different from original
+                if (Math.abs(product.price - product.originalPrice) > 5) {
+                    const priceChange = product.originalPrice - product.price;
+                    
+                    const insightItem = document.createElement('li');
+                    insightItem.className = 'mb-1';
+                    insightItem.innerHTML = `
+                        <strong>${product.name}</strong>: ${priceChange > 0 ? 
+                            `Reduced by $${priceChange.toFixed(2)} due to ${daysSinceUpdate > 60 ? 'seasonal clearance' : 'high competition'}` : 
+                            'Premium pricing for high-demand item'}
+                    `;
+                    pricingDetails.appendChild(insightItem);
+                }
+            });
+            
+            // Update displayed prices with dynamic pricing
+            const updatedProducts = products.map(product => {
+                // In a real app, you might fetch live pricing data
+                return product;
+            });
+            
+            renderProducts(updatedProducts);
+        }
+
+        // Option C: Recommendation System
+        function generateRecommendations() {
+            const favoriteCategory = document.getElementById('user-category').value;
+            const budget = parseFloat(document.getElementById('user-budget').value);
+            
+            // Filter products based on preferences
+            let recommended;
+            if (favoriteCategory && budget) {
+                recommended = products.filter(p => 
+                    p.category === favoriteCategory && p.price <= budget
+                ).sort((a, b) => b.rating - a.rating);
+            } else if (favoriteCategory) {
+                recommended = products.filter(p => 
+                    p.category === favoriteCategory
+                ).sort((a, b) => b.rating - a.rating);
+            } else if (budget) {
+                recommended = products.filter(p => 
+                    p.price <= budget
+                ).sort((a, b) => b.rating - a.rating);
+            } else {
+                // Default recommendations based on popularity
+                recommended = [...products].sort((a, b) => b.popularity - a.popularity);
+            }
+            
+            // Display top recommendations (3-5 items)
+            recommended = recommended.slice(0, 5);
+            recommendedProducts.innerHTML = '';
+            
+            recommended.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden';
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-32 object-cover">
+                    <div class="p-3">
+                        <h4 class="font-semibold text-sm text-gray-800 mb-1">${product.name}</h4>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-indigo-700 text-sm">$${product.price.toFixed(2)}</span>
+                            <div class="flex items-center">
+                                ${generateStarRating(product.rating)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                recommendedProducts.appendChild(productCard);
+            });
+            
+            recommendationsContainer.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
